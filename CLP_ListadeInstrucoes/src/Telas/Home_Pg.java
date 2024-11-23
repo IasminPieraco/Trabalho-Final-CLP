@@ -14,9 +14,6 @@ import compiladorinstructionlist.output.OutputActions;
 import compiladorinstructionlist.uppercasedocumentfilter.UpperCaseDocumentFilter;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,32 +24,32 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 /**
  *
  * @author vinic
  */
-public class Home_Pg extends javax.swing.JFrame {
+public final class Home_Pg extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Home_Pg
-     */
 
      // Cria variáveis
     static Map<String, Integer> inputsType;
     static Map<String, Boolean> inputs;
     static Map<String, Boolean> outputs;
-    static Map<String, MemoryVariable> memoryVariables = new HashMap<String, MemoryVariable>();
+    static Map<String, MemoryVariable> memoryVariables = new HashMap<>();
     static Integer mode = 1;
     static Integer color = 1;
-    static String lingua = "PT-BR";
-    
+    private final JTextArea Lista_de_variaveis;
+    Lista_de_variaveis_Pg tela2 = new Lista_de_variaveis_Pg();
+
+    @SuppressWarnings("unchecked")
     public Home_Pg() {
         initComponents();
+        Lista_de_variaveis = tela2.getListaDeVariaveis();
         //setando informaçoes iniciais
         ImageIcon icon = new ImageIcon("src/Assets/led_desligado.png");
         icon.setImage( icon.getImage().getScaledInstance(Saida_1.getWidth(), Saida_1.getHeight(),1));
@@ -106,7 +103,7 @@ public class Home_Pg extends javax.swing.JFrame {
         inputs = InputActions.create(inputs);
         System.out.println("HashMap de entradas criado:" + inputs);
         outputs = OutputActions.create(outputs);
-        System.out.println("assaa");
+        // System.out.println("assaa");
         System.out.println("HashMap de saídas criado:" + outputs);
         // Atualiza entradas e saídas na tela
         updateScreen();
@@ -157,41 +154,57 @@ public class Home_Pg extends javax.swing.JFrame {
     // Atualiza o modo atual na tela
     public void updateMode() {
         System.out.println("Modo atual: " + mode);
-        if (mode == 1) {
-            Codigo_Camp.setEditable(true);
-            ImageIcon icon1 = new ImageIcon("src/Assets/start.png");
-            icon1.setImage( icon1.getImage().getScaledInstance(Run_BT.getWidth(), Run_BT.getHeight(),1));
-            Run_BT.setIcon(icon1);
-            //jSpinner1.setEditable(true);
-        } else if (mode == 2) {
-            Codigo_Camp.setEditable(false);
-            ImageIcon icon1 = new ImageIcon("src/Assets/start.png");
-            icon1.setImage( icon1.getImage().getScaledInstance(Run_BT.getWidth(), Run_BT.getHeight(),1));
-            Run_BT.setIcon(icon1);
-        } else {
+        if (null == mode) {
             Codigo_Camp.setEditable(false);
             ImageIcon icon1 = new ImageIcon("src/Assets/start_verde.png");
             icon1.setImage( icon1.getImage().getScaledInstance(Run_BT.getWidth(), Run_BT.getHeight(),1));
             Run_BT.setIcon(icon1);
+        } else switch (mode) {
+            case 1 ->                 {
+                    Codigo_Camp.setEditable(true);
+                    ImageIcon icon1 = new ImageIcon("src/Assets/start.png");
+                    icon1.setImage( icon1.getImage().getScaledInstance(Run_BT.getWidth(), Run_BT.getHeight(),1));
+                    Run_BT.setIcon(icon1);
+                //jSpinner1.setEditable(true);
+                }
+            case 2 ->                 {
+                    Codigo_Camp.setEditable(false);
+                    ImageIcon icon1 = new ImageIcon("src/Assets/start.png");
+                    icon1.setImage( icon1.getImage().getScaledInstance(Run_BT.getWidth(), Run_BT.getHeight(),1));
+                    Run_BT.setIcon(icon1);
+                }
+            default ->                 {
+                    Codigo_Camp.setEditable(false);
+                    ImageIcon icon1 = new ImageIcon("src/Assets/start_verde.png");
+                    icon1.setImage( icon1.getImage().getScaledInstance(Run_BT.getWidth(), Run_BT.getHeight(),1));
+                    Run_BT.setIcon(icon1);
+                }
         }
     }
 
     // Atualiza as variáveis de memória na tela
     public void updateMemoryVariables() {
-//        Lista_de_variaveis.setText("");
-//
-//        String line = "";
-//
-//        for (Map.Entry<String, MemoryVariable> variable : memoryVariables.entrySet()) {
-//            if(variable.getKey().charAt(0) == 'M')
-//                line = variable.getKey() + " = " + variable.getValue().currentValue + "\n";
-//            else if (variable.getKey().charAt(0) == 'T'){
-//                line = variable.getKey() + " = " + variable.getValue().currentValue + ", " + variable.getValue().counter+ ", " + variable.getValue().maxTimer+ ", " + variable.getValue().endTimer + "\n";
-//            }else if (variable.getKey().charAt(0) == 'C'){
-//                line = variable.getKey() + " = " + variable.getValue().counter+ ", " + variable.getValue().maxTimer+ ", " + variable.getValue().endTimer + "\n";
-//            }
-//                Lista_de_variaveis.setText(Lista_de_variaveis.getText() + line);
-//        }
+        StringBuilder textBuilder = new StringBuilder();
+    
+        for (Map.Entry<String, MemoryVariable> variable : memoryVariables.entrySet()) {
+            String line = "";
+            switch (variable.getKey().charAt(0)) {
+                case 'M' -> line = variable.getKey() + " = " + variable.getValue().currentValue + "\n";
+                case 'T' -> line = variable.getKey() + " = " + variable.getValue().currentValue + ", " + variable.getValue().counter + ", " + variable.getValue().maxTimer + ", " + variable.getValue().endTimer + "\n";
+                case 'C' -> line = variable.getKey() + " = " + variable.getValue().counter + ", " + variable.getValue().maxTimer + ", " + variable.getValue().endTimer + "\n";
+                default -> {
+                }
+            }
+            textBuilder.append(line);
+        }
+        
+        String textToSet = textBuilder.toString();
+        System.out.println("Setting text to JTextArea: " + textToSet);
+    
+        SwingUtilities.invokeLater(() -> {
+            Lista_de_variaveis.setText(textToSet);
+            System.out.println("Text set in JTextArea.");
+        });
     }
 
     // Mostra mensagem de erro na tela
@@ -219,6 +232,7 @@ public class Home_Pg extends javax.swing.JFrame {
         return lineList;
     }
     
+    @SuppressWarnings("rawtypes")
     public Map setaBit(Map<String,Boolean> inputs){
         Boolean input = inputs.get("I1");
         inputs.clear();
@@ -282,11 +296,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Simulacoes.setBackground(new java.awt.Color(8, 94, 131));
         Simulacoes.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Painel", "Simulação 1", "Simulação 2", "Simulação 3" }));
-        Simulacoes.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                SimulacoesActionPerformed(evt);
-            }
-        });
+        Simulacoes.addActionListener(this::SimulacoesActionPerformed);
 
         Run_BT.setFont(new java.awt.Font("Segoe UI", 0, 5)); // NOI18N
         Run_BT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/start.png"))); // NOI18N
@@ -298,33 +308,30 @@ public class Home_Pg extends javax.swing.JFrame {
         Run_BT.setIconTextGap(0);
         Run_BT.setMaximumSize(new java.awt.Dimension(50, 50));
         Run_BT.setMinimumSize(new java.awt.Dimension(50, 50));
-        Run_BT.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                Run_BTBT_Run_Pressionado(evt);
-            }
-        });
+        Run_BT.addActionListener(this::Run_BTBT_Run_Pressionado);
 
         Arquivar_BT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Arquivar", "Salvar", "Item 3", "Item 4" }));
 
         Editar_BT.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Editar", "Tema", "Idioma" }));
+<<<<<<< Updated upstream
+=======
+        Editar_BT.addActionListener(this::Editar_BTActionPerformed);
+>>>>>>> Stashed changes
 
         Help_BT.setText("Help");
 
         Sobre_BT.setText("Sobre");
-        Sobre_BT.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                Sobre_BTActionPerformed(evt);
-            }
-        });
+        Sobre_BT.addActionListener(this::Sobre_BTActionPerformed);
 
         Pause_BT.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/pause.png"))); // NOI18N
         Pause_BT.setOpaque(true);
-        Pause_BT.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                Pause_BTActionPerformed(evt);
-            }
-        });
+        Pause_BT.addActionListener(this::Pause_BTActionPerformed);
 
+<<<<<<< Updated upstream
+=======
+        Variaveis_BT.addActionListener(this::Variaveis_BTA);
+
+>>>>>>> Stashed changes
         jSpinner1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
         Label_Delay.setText("Tempo de Delay em ms:");
@@ -355,6 +362,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_5.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_5MousePressed(evt);
             }
@@ -362,9 +370,11 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_1.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_1MousePressed(evt);
             }
+            @Override
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 Entrada_1MouseReleased(evt);
             }
@@ -372,6 +382,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_6.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_6MousePressed(evt);
             }
@@ -379,6 +390,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_2.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_2MousePressed(evt);
             }
@@ -386,6 +398,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_8.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_8MousePressed(evt);
             }
@@ -393,6 +406,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_4.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_4MousePressed(evt);
             }
@@ -400,6 +414,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_7.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_7MousePressed(evt);
             }
@@ -407,6 +422,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
         Entrada_3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Assets/chave_aberta.png"))); // NOI18N
         Entrada_3.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 Entrada_3MousePressed(evt);
             }
@@ -615,6 +631,7 @@ public class Home_Pg extends javax.swing.JFrame {
     private void SimulacoesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SimulacoesActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_SimulacoesActionPerformed
+    @SuppressWarnings("unchecked")
     private void Run_BTBT_Run_Pressionado(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Run_BTBT_Run_Pressionado
         if(mode != 3){
             System.out.println("\nBotão run clicado!");
@@ -625,7 +642,7 @@ public class Home_Pg extends javax.swing.JFrame {
 
             if (!stringTime.equals("")) {
                 try {
-                    time = Integer.parseInt(stringTime);
+                    time = Integer.valueOf(stringTime);
                 } catch (NumberFormatException e) {
                     mode = 1;
                     updateMode();
@@ -636,42 +653,38 @@ public class Home_Pg extends javax.swing.JFrame {
             }
 
             // Executa o laço corretamente sem travar a tela 
-            Timer timer = new Timer(time, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent evt) {
-                    // Salva linhas da área de texto
-                    List<String> lineList = new ArrayList<String>();
-                    lineList = saveLines(lineList);
-
-                    if (mode == 3) {
-                        //inputs = InputActions.dummyRead(inputs);
-                        inputs = InputActions.read(inputs);
-                        outputs = OutputActions.setAllFalse(outputs);
-                        outputs = Interpreter.receiveLines(lineList, inputs, outputs, memoryVariables);
-                        for(Map.Entry<String, MemoryVariable> variable : memoryVariables.entrySet()){
-                            if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("ON") && variable.getValue().currentValue == true)
-                                variable.getValue().timer.start();
-                            else if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("ON") && variable.getValue().currentValue == false){
-                                variable.getValue().timer.stop();
-                                variable.getValue().counter = 0;
-                                variable.getValue().endTimer = false;
-                            }
-                            if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("OFF") && variable.getValue().currentValue == true){
-                                variable.getValue().timer.stop();
-                                variable.getValue().counter = 0;
-                                variable.getValue().endTimer = true;
-                            }else if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("OFF") && variable.getValue().currentValue == false){
-                                variable.getValue().timer.start();
-                            }
+            Timer timer = new Timer(time, (ActionEvent evt1) -> {
+                // Salva linhas da área de texto
+                List<String> lineList = new ArrayList<>();
+                lineList = saveLines(lineList);
+                if (mode == 3) {
+                    //inputs = InputActions.dummyRead(inputs);
+                    inputs = InputActions.read(inputs);
+                    outputs = OutputActions.setAllFalse(outputs);
+                    outputs = Interpreter.receiveLines(lineList, inputs, outputs, memoryVariables);
+                    for(Map.Entry<String, MemoryVariable> variable : memoryVariables.entrySet()){
+                        if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("ON") && variable.getValue().currentValue == true)
+                            variable.getValue().timer.start();
+                        else if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("ON") && variable.getValue().currentValue == false){
+                            variable.getValue().timer.stop();
+                            variable.getValue().counter = 0;
+                            variable.getValue().endTimer = false;
                         }
-                        //outputs = OutputActions.dummyWrite(outputs);
-                        outputs = OutputActions.write(outputs);
-                        updateMode();
-                        updateScreen();
-                        updateMemoryVariables();
-                    } else {
-                        ((Timer) evt.getSource()).stop();
+                        if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("OFF") && variable.getValue().currentValue == true){
+                            variable.getValue().timer.stop();
+                            variable.getValue().counter = 0;
+                            variable.getValue().endTimer = true;
+                        }else if(variable.getKey().charAt(0) == 'T' && variable.getValue().timerType.equals("OFF") && variable.getValue().currentValue == false){
+                            variable.getValue().timer.start();
+                        }
                     }
+                    //outputs = OutputActions.dummyWrite(outputs);
+                    outputs = OutputActions.write(outputs);
+                    updateMode();
+                    updateScreen();
+                    updateMemoryVariables();
+                } else {
+                    ((Timer) evt1.getSource()).stop();
                 }
             });
 
@@ -689,7 +702,15 @@ public class Home_Pg extends javax.swing.JFrame {
             updateMode();
         }
     }//GEN-LAST:event_Run_BTBT_Run_Pressionado
+<<<<<<< Updated upstream
 
+=======
+    private void Variaveis_BTA(java.awt.event.ActionEvent evt){
+        tela2.setVisible(true);
+        tela2.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        tela2.setLocation(1100,0);
+    }
+>>>>>>> Stashed changes
     private void Pause_BTActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Pause_BTActionPerformed
         System.out.println("\nBotão program clicado!");
         mode = 1;
@@ -941,6 +962,7 @@ public class Home_Pg extends javax.swing.JFrame {
     }
     
     private void setaLanguage(){
+        @SuppressWarnings("rawtypes")
         JComboBox aux = Language.getArquivar();
         Arquivar_BT.removeItemAt(0);
         Arquivar_BT.removeItemAt(0);
@@ -995,22 +1017,16 @@ public class Home_Pg extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Home_Pg.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Home_Pg.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Home_Pg.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Home_Pg.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         
+        //</editor-fold>
+        
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Home_Pg().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new Home_Pg().setVisible(true);
         });
     }
 
